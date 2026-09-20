@@ -22,7 +22,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: pokemon_flask/requirements.txt
+          cache-dependency-path: pokemon/requirements.txt
 
       - name: Install dependencies
         working-directory: pokemon_flask
