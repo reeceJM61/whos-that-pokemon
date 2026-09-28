@@ -44,9 +44,9 @@ jobs:
         run: |
           python app.py &
           echo $! > flask.pid
-          # give it a moment to bind the port
+          # wait for a healthy (2xx) response, not just any response
           for i in {1..10}; do
-            curl -s http://localhost:5000/ -o /dev/null && break
+            curl -sf http://localhost:5000/ -o /dev/null && break
             sleep 1
           done
 
@@ -72,6 +72,10 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
+
+    env:
+      FLASK_SECRET_KEY: ${{ secrets.FLASK_SECRET_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -82,15 +86,20 @@ jobs:
       - name: Run container and smoke-test
         run: |
           docker run -d -p 5000:5000 \
-            -e FLASK_SECRET_KEY="${{ secrets.FLASK_SECRET_KEY }}" \
+            -e FLASK_SECRET_KEY="$FLASK_SECRET_KEY" \
             --name pokemon-guesser pokemon-guesser
+          # wait for a healthy (2xx) response, not just any response
           for i in {1..10}; do
-            curl -s http://localhost:5000/ -o /dev/null && break
+            curl -sf http://localhost:5000/ -o /dev/null && break
             sleep 1
           done
           status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/)
           echo "Status: $status"
           test "$status" = "200"
+
+          image_status=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/image)
+          echo "Image status: $image_status"
+          test "$image_status" = "200"
 
       - name: Show container logs on failure
         if: failure()

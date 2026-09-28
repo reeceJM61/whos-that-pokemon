@@ -37,7 +37,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 
 # ---------------------------------------------------------------------------
@@ -177,4 +177,4 @@ def next_round():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000)
