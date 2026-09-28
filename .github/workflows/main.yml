@@ -22,14 +22,13 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: pokemon/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
-        working-directory: pokemon_flask
         run: pip install -r requirements.txt
 
       - name: Check app imports and routes register
-        working-directory: pokemon_flask
+        working-directory: src
         run: |
           python -c "
           import app
@@ -40,7 +39,7 @@ jobs:
           "
 
       - name: Start Flask app in background
-        working-directory: pokemon_flask
+        working-directory: src
         run: |
           python app.py &
           echo $! > flask.pid
@@ -64,7 +63,7 @@ jobs:
 
       - name: Stop Flask app
         if: always()
-        working-directory: pokemon_flask
+        working-directory: src
         run: |
           if [ -f flask.pid ]; then
             kill "$(cat flask.pid)" || true
@@ -77,7 +76,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        working-directory: pokemon_flask
         run: docker build -t pokemon-guesser .
 
       - name: Run container and smoke-test
